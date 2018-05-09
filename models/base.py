@@ -1,17 +1,20 @@
-from typing import List
+from typing import List, Callable
 
 from data import DataLoader
 import tensorflow as tf
 
 class BaseModel:
-    def __init__(self, config) -> None:
-        if "shape" not in config:
-            raise ValueError("Config must have a shape entry of type List describing the shape of the network")
-        self.num_layers = len(config["shape"])
-        self.shape = config["shape"]
-        self.learning_rate = config["lr"] if "lr" in config else 0.01
-        self.epochs = config["epochs"] if "epochs" in config else 1000
-        self.batch_size = config["batch_size"] if "batch_size" in config else 64
+    def __init__(
+        self,
+        shape:List[int],
+        sess:tf.Session(),
+        lr:float=0.01,
+        init_method=tf.random_normal) -> None:
+        if not shape:
+            raise ValueError("Can't have an empty shape")
+        self.num_layers = len(shape)
+        self.shape = shape
+        self.learning_rate = lr
         
         self.weights = {}
         self.biases = {}
@@ -19,15 +22,26 @@ class BaseModel:
         self.inputs = tf.placeholder(tf.float32, [None, self.shape[0]], "inputs")
         self.targets = tf.placeholder(tf.float32, [None, self.shape[-1]], "targets")
         
-        self.init_weights_and_biases()
+        self.init_weights_and_biases(init_method)
         self.model = self.build_model()
 
-        self.sess = config["sess"] if "sess" in config else tf.Session()
+        self.sess = sess
         self.loss = self.get_loss_function()
         self.trainer = self.get_trainer()
     
-    def init_weights_and_biases(self):
-        raise NotImplementedError
+    def init_weights_and_biases(self, init:Callable):
+        for i, layer_size in enumerate(self.shape):
+            if i == self.num_layers - 1:
+                break
+            next_layer_size = self.shape[i+1]
+            self.weights[i] = tf.Variable(
+                init([layer_size, next_layer_size]), 
+                name=f"weight_{i}"
+            )
+            self.biases[i] = tf.Variable(
+                tf.ones([1, next_layer_size]),
+                name=f"bias_{i}"
+            )
     
     def build_model(self) -> tf.Tensor:
         raise NotImplementedError
@@ -38,8 +52,8 @@ class BaseModel:
     def get_trainer(self):
         return tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.get_loss_function())
 
-    def train(self, data_loader:DataLoader):
-        for i in range(self.epochs):
+    def train(self, data_loader:DataLoader, epochs=1000):
+        for i in range(epochs):
             x, y = data_loader.next_batch()
             self.sess.run(self.trainer, feed_dict={
                 self.inputs: x,
