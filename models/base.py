@@ -59,6 +59,12 @@ class BaseModel:
                 self.inputs: x,
                 self.targets: y
             })
+
+            if i % 100 == 0:
+                print(self.sess.run(self.loss, feed_dict={
+                    self.inputs: x,
+                    self.targets: y
+                }))
     
     def predict(self, x:List[List[float]]) -> List[List[float]]:
         return self.sess.run(self.model, feed_dict={

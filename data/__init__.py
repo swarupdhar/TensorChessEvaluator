@@ -1,1 +1,1 @@
-from .loader import DataLoader, CSVLoader
+from .loader import DataLoader, CSVLoader, PgnLoader
