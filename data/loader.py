@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 import csv
 import numpy as np
 import chess
@@ -17,7 +17,8 @@ class DataLoader:
         raise NotImplementedError
 
 class CSVLoader(DataLoader):
-    def __init__(self, file_name:str, batch_size:int = 32):
+    def __init__(self, file_name:str, batch_size:int = 32, scale:float=1):
+        self.scale_val = scale
         super().__init__(file_name, batch_size)
     
     def get_data(self) -> List[List[str]]:
@@ -27,7 +28,8 @@ class CSVLoader(DataLoader):
             for line in csv_file:
                 row_data = []
                 for item in line.strip().split(","):
-                    row_data.append(float(item.strip()))
+                    dat = float(item.strip())/self.scale_val
+                    row_data.append(dat)
                 result.append(row_data)
         return result
     

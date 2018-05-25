@@ -4,12 +4,11 @@ from data import DataLoader
 import tensorflow as tf
 
 class BaseModel:
-    def __init__(
-        self,
-        shape:List[int],
-        sess:tf.Session(),
-        lr:float=0.01,
-        init_method=tf.random_normal) -> None:
+    def __init__(self,
+                shape:List[int],
+                sess:tf.Session,
+                lr:float=0.01,
+                init_method=tf.random_normal) -> None:
         if not shape:
             raise ValueError("Can't have an empty shape")
         self.num_layers = len(shape)
@@ -47,12 +46,15 @@ class BaseModel:
         raise NotImplementedError
     
     def get_loss_function(self):
-        return tf.reduce_sum(tf.square(self.model - self.targets))
+        return tf.losses.mean_squared_error(
+            self.targets,
+            self.model
+        )
 
     def get_trainer(self):
         return tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.get_loss_function())
 
-    def train(self, data_loader:DataLoader, epochs=1000):
+    def train(self, data_loader:DataLoader, epochs:int=1000, out_freq:int=100):
         for i in range(epochs):
             x, y = data_loader.next_batch()
             self.sess.run(self.trainer, feed_dict={
@@ -60,7 +62,7 @@ class BaseModel:
                 self.targets: y
             })
 
-            if i % 100 == 0:
+            if i % out_freq == 0:
                 print(self.sess.run(self.loss, feed_dict={
                     self.inputs: x,
                     self.targets: y

@@ -10,14 +10,11 @@ class LinearOutputLayerNetwork(BaseModel):
             0.01
         )
     
-    def get_loss_function(self):
-        return tf.losses.mean_squared_error(
-            self.targets,
-            self.model
-        )
-    
     def get_trainer(self):
-        return tf.train.AdadeltaOptimizer(learning_rate=self.learning_rate).minimize(self.get_loss_function())
+        return (
+            tf.train.AdadeltaOptimizer(learning_rate=self.learning_rate)
+                .minimize(self.get_loss_function())
+        )
     
     def build_model(self) -> tf.Tensor:
         current = self.inputs
