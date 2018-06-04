@@ -1,5 +1,5 @@
 # TensorChessEvaluator
-A Tensorflow project that aims to use ai in chess (not involving playing). Currently using deep autoencoder to find similarity between various chess positions.
+A Tensorflow project that aims to use ai in chess (not involving playing). Currently using deep autoencoder to encode the structures of a chess position; and using it to define similarity between positions.
 
 Integers are used to represent the pieces as follows:
 
