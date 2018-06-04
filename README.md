@@ -1,2 +1,2 @@
 # TensorChessEvaluator
-A Tensorflow project that aims to predict the evaluation of a chess position.
+A Tensorflow project that aims to use ai to define similarity between chess positions.
